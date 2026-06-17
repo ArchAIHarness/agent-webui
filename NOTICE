@@ -1,0 +1,27 @@
+agent-webui
+Copyright (c) 2026 ArchAIHarness
+Licensed under the MIT License.
+
+This product depends on the following third-party software, each
+distributed under its own license:
+
+- OpenSumi (https://github.com/opensumi/core)
+  Licensed under the MIT License.
+  Copyright (c) Ant Group Co., Ltd.
+
+- OpenCode (https://opencode.ai)
+  Licensed under the MIT License.
+
+- AG-UI Protocol (https://github.com/ag-ui-protocol/ag-ui)
+  Licensed under the Apache License 2.0.
+
+- mcp-ui (https://github.com/idosal/mcp-ui)
+  Licensed under the Apache License 2.0.
+
+- Monaco Editor / Tiptap / pdf.js / xterm.js / Mermaid
+  Each distributed under its own license; see respective project
+  for details. Charts in agent-webui are rendered exclusively via
+  Mermaid; ECharts is not used.
+
+The agent-webui project itself does not redistribute the source code
+of these dependencies; it consumes them as published packages.
