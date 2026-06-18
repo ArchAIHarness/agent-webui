@@ -1,0 +1,12 @@
+node_modules
+.pnpm-store
+.git
+.gitignore
+.DS_Store
+*.log
+coverage
+data
+dist
+**/.tsbuildinfo
+.vscode
+.idea

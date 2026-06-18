@@ -1,0 +1,46 @@
+{
+  "name": "@archai/agent-webui",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Agent IDE based on OpenSumi core, integrating OpenCode via AG-UI protocol.",
+  "license": "MIT",
+  "homepage": "https://github.com/ArchAIHarness/agent-webui",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArchAIHarness/agent-webui.git"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@11.1.2",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "typecheck": "tsc -b",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "test": "pnpm -r run test",
+    "clean": "pnpm -r run clean && rimraf '**/*.tsbuildinfo'",
+    "dev": "pnpm --filter @archai/agent-webui-ide-app dev"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.16.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "dependencies": {
+    "@opensumi/di": "1.10.1"
+  }
+}

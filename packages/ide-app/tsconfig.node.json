@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist/node",
+    "rootDir": "./src/node",
+    "composite": true,
+    "tsBuildInfoFile": "./dist/node/.tsbuildinfo",
+    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"]
+  },
+  "include": ["src/node/**/*"],
+  "references": [
+    { "path": "../shared" },
+    { "path": "../ag-ui-adapter" }
+  ]
+}

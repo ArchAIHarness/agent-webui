@@ -1,0 +1,14 @@
+packages:
+  - "packages/*"
+  - "extensions/*"
+allowBuilds:
+  '@opensumi/vscode-ripgrep': true
+  '@parcel/watcher': true
+  core-js: true
+  es5-ext: true
+  esbuild: true
+  keytar: true
+  leveldown: true
+  node-pty: true
+  nsfw: true
+  spdlog: true

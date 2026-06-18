@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  },
+  "include": ["src/index.ts", "src/types.ts", "src/module-registry.ts"],
+  "references": [
+    { "path": "../shared" },
+    { "path": "../ag-ui-adapter" }
+  ]
+}

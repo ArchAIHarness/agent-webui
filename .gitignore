@@ -15,5 +15,12 @@ kubeconfig*
 data/
 dist/
 out/
+build/
+coverage/
+.tsbuildinfo
+*.tsbuildinfo
+.cache/
+.pnpm-store/
+.turbo/
 .vscode/
 .idea/

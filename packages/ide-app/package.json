@@ -1,0 +1,71 @@
+{
+  "name": "@archai/agent-webui-ide-app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "OpenSumi-based Agent IDE entry. Wires up custom modules and consumes ag-ui-adapter.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/node/server.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "agent-webui-server": "./dist/node/server.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./server": {
+      "import": "./dist/node/server.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm run build:types && pnpm run build:node && pnpm run build:browser",
+    "build:types": "tsc -p tsconfig.json",
+    "build:node": "tsc -p tsconfig.node.json",
+    "build:browser": "NODE_ENV=production webpack --config webpack.config.mjs",
+    "clean": "rimraf dist *.tsbuildinfo",
+    "dev": "pnpm run build:browser && tsx watch src/node/server.ts",
+    "start": "node dist/node/server.js",
+    "test": "echo \"no tests yet\" && exit 0"
+  },
+  "dependencies": {
+    "@archai/agent-webui-ag-ui-adapter": "workspace:*",
+    "@archai/agent-webui-shared": "workspace:*",
+    "@hono/node-server": "^1.13.7",
+    "@opensumi/di": "1.10.1",
+    "@opensumi/ide-core-browser": "3.9.0",
+    "@opensumi/ide-core-node": "3.9.0",
+    "@opensumi/ide-file-service": "3.9.0",
+    "@opensumi/ide-i18n": "3.9.0",
+    "@opensumi/ide-main-layout": "3.9.0",
+    "@opensumi/ide-monaco": "3.9.0",
+    "@opensumi/ide-startup": "3.9.0",
+    "@opensumi/ide-status-bar": "3.9.0",
+    "@opensumi/ide-workspace": "3.9.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "tslib": "2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "18.3.27",
+    "@types/react-dom": "18.3.7",
+    "copy-webpack-plugin": "13.0.1",
+    "css-loader": "7.1.2",
+    "file-loader": "6.2.0",
+    "html-webpack-plugin": "5.6.4",
+    "less": "4.4.2",
+    "less-loader": "12.3.0",
+    "rimraf": "^6.0.1",
+    "style-loader": "4.0.0",
+    "ts-loader": "9.5.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "webpack": "5.103.0",
+    "webpack-cli": "5.1.4"
+  }
+}

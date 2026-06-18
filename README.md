@@ -128,7 +128,35 @@ AG-UI 是"A2UI"在跨厂商规范层的标准答案。MCP-UI 与 AG-UI 互补：
 
 详见 [docs/opensumi-integration.md](docs/opensumi-integration.md)。
 
-## 8. 路线图
+## 8. 本地运行
+
+```bash
+pnpm install
+pnpm --filter @archai/agent-webui-ide-app build
+pnpm --filter @archai/agent-webui-ide-app start
+```
+
+浏览器访问：
+
+- agent-webui OpenSumi IDE：`http://127.0.0.1:3000/webui/`
+- 健康检查：`http://127.0.0.1:3000/webui/healthz`
+- AG-UI mock SSE：`http://127.0.0.1:3000/webui/ag-ui/sessions/demo/stream`
+
+构建镜像：
+
+```bash
+docker build -t archai/agent-webui:m1 .
+docker run --rm -p 127.0.0.1:3000:3000 -p 127.0.0.1:4096:4096 archai/agent-webui:m1
+```
+
+镜像内包含 OpenCode CLI 与 agent-webui server，supervisord 同时拉起：
+
+- OpenCode：容器内 `0.0.0.0:4096`
+- agent-webui：容器内 `0.0.0.0:3000`
+
+安全提醒：上述 `docker run` 示例只绑定 `127.0.0.1`，仅用于本机调试。生产或远程环境不得直接暴露 3000/4096，必须经 `agent-master` 与上游网关鉴权；如果需要直接访问 OpenCode 4096，必须显式配置 `OPENCODE_SERVER_PASSWORD`。
+
+## 9. 路线图
 
 详见 [docs/roadmap.md](docs/roadmap.md)。简版：
 
@@ -139,7 +167,7 @@ AG-UI 是"A2UI"在跨厂商规范层的标准答案。MCP-UI 与 AG-UI 互补：
 - M4 完整布局切换 + 富 UI 第二批：LayoutSwitcher / Tiptap / PDF / Form
 - M5 替换 AionUi：本仓库镜像成为默认 WebUI 镜像，`agent-image-webui` 保留为兼容/经济版
 
-## 9. 仓库结构（规划）
+## 10. 仓库结构
 
 ```text
 agent-webui/
@@ -171,9 +199,9 @@ agent-webui/
 - package.json             # bun/pnpm workspace
 ```
 
-当前仓库仅 `docs/` 与根级元数据落地，代码实现按 M1 启动。
+当前仓库已落地 M1 骨架：pnpm workspace、OpenSumi 3.9.0 浏览器 bundle、OpenSumi ServerApp、AG-UI mock SSE、Dockerfile、supervisord 双进程镜像。
 
-## 10. 与现有仓库的关系
+## 11. 与现有仓库的关系
 
 - `agent-master`：增加镜像选择策略；不更换反代路径，仍是 `/agent/*` 与 `/webui/*`，但 `/webui/*` 在新镜像里指向 agent-webui。
 - `agent-image-webui`：保持现状，作为"经济版/即开即用"形态长期共存。
@@ -181,7 +209,7 @@ agent-webui/
 - `agent-image`：保持现状，作为无头 API/SDK 形态。
 - `agent-plugin`：能力扩展继续走 OpenCode 原生 + MCP，不绑定 WebUI；agent-webui 通过 OpenCode 间接消费。
 
-## 11. 安全边界
+## 12. 安全边界
 
 - 不保存 Token / Cookie / API Key / `.env` / 证书 / 私钥。
 - 不读取用户 NAS 数据除非通过 OpenCode 标准会话/工具通道，或通过 OpenSumi 文件服务在用户工作区内。
@@ -189,7 +217,7 @@ agent-webui/
 - 富 UI 嵌入第三方资源时强制 sandbox iframe，禁止与主域共享 Cookie。
 - vscode 扩展只允许加载经平台审核或用户主动安装的扩展；不内置在线市场静默安装。
 
-## 12. 设计原则
+## 13. 设计原则
 
 1. 协议优先：先定 AG-UI 映射，再写 UI；不发明私有协议。
 2. 不 fork OpenSumi：所有定制走 Module + Slot + Contribution，不动 core 源码。
@@ -197,7 +225,7 @@ agent-webui/
 4. 薄网关：服务端只做协议翻译 + 资源托管，不承载业务逻辑。
 5. 与 OpenCode 契约：以 OpenCode Web API 为唯一事实源，不旁路。
 
-## 13. 相关链接
+## 14. 相关链接
 
 - [智能体平台总览](../README.md)
 - [agent-master](../agent-master/README.md)

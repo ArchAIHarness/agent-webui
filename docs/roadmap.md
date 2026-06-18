@@ -21,25 +21,27 @@
 
 完成口径：本仓库当前 markdown 状态。
 
-## M1：最小 IDE + 单向 AG-UI + 镜像
+## M1：最小 IDE + 单向 AG-UI + 镜像（已完成本地镜像冒烟）
 
 目标：用户从 `agent-master` 反代访问到本仓库镜像，能看到一个 OpenSumi IDE，能向 OpenCode 发消息并以 AG-UI 形式接收回包。
 
-任务：
+已完成：
 
-- workspace：bun 或 pnpm workspace 锁定
-- packages/ide-app：OpenSumi BrowserModule + NodeModule 启动壳
-- packages/ag-ui-adapter：OpenCode SSE -> AG-UI Event Stream 转换
-- packages/shared：AG-UI / OpenCode / MCP-UI 共享类型
-- 自研 Module 最小集：AGUIClientModule、AgentChatModule（只读视图）
-- 子路径挂载：根路径 `/webui/`
-- docker/Dockerfile：基于 node alpine，`npm install -g opencode-ai` 内置 OpenCode CLI，COPY agent-webui 构建产物
-- docker/supervisord.conf：opencode + agent-webui 双进程
-- docker/entrypoint.sh：dumb-init -> supervisord
-- docker/healthcheck.sh：双端口探活
-- 与 `agent-master` 联调：经 `/agent/*` 与 `/webui/*` 双反代访问
+- pnpm workspace 锁定，Node 22 作为运行目标。
+- `packages/shared`：AG-UI / OpenCode / MCP-UI 共享类型。
+- `packages/ag-ui-adapter`：Hono 路由、healthz / readyz、AG-UI mock SSE、OpenCode 事件翻译骨架。
+- `packages/ide-app`：OpenSumi 3.9.0 Browser bundle + ServerApp，使用 `CommonBrowserModules` / `CommonNodeModules` 启动真实 IDE。
+- 子路径挂载：浏览器入口 `/webui/`。
+- `Dockerfile`：基于 `node:22-bookworm-slim`，内置 `opencode-ai@1.17.8`、OpenSumi 构建产物与 agent-webui server。
+- `docker/supervisord.conf`：opencode + agent-webui 双进程。
+- `docker/entrypoint.sh`：dumb-init -> supervisord。
+- `docker/healthcheck.sh`：双端口探活。
+- 本地验证：`docker build -t archai/agent-webui:m1 .` 通过；`docker run -p 3000:3000 -p 4096:4096 archai/agent-webui:m1` 后容器 healthy，`/webui/healthz`、`/webui/`、OpenCode 4096 均可访问。
 
-完成口径：本地 docker run + curl 双端口通；接入测试 master 能在浏览器看到 IDE 并完成单轮 chat。
+待接入验证：
+
+- 与 `agent-master` 联调 `/agent/*` 与 `/webui/*` 双反代。
+- `agent-master` 侧确认是否剥离 `/webui` 前缀；当前 OpenSumi WebSocket 本地默认走 `/service`。
 
 ## M2：vscode 扩展生态 + 双向 AG-UI
 
