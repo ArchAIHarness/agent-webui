@@ -30,8 +30,8 @@
 - pnpm workspace 锁定，Node 22 作为运行目标。
 - `packages/shared`：AG-UI / OpenCode / MCP-UI 共享类型。
 - `packages/ag-ui-adapter`：Hono 路由、healthz / readyz、AG-UI mock SSE、OpenCode 事件翻译骨架。
-- `packages/ide-app`：OpenSumi 3.9.0 Browser bundle + ServerApp，使用 `CommonBrowserModules` / `CommonNodeModules` 启动真实 IDE。
-- 子路径挂载：浏览器入口 `/webui/`。
+- `packages/ide-app`：OpenSumi 3.9.0 Browser bundle + ServerApp，使用显式 M1 Browser/Node 模块白名单启动基础 IDE，避免提前启用 Terminal/Search/Extension/Debug 深功能。
+- 子路径挂载：浏览器入口 `/webui/`，OpenSumi WebSocket 保持在 `/webui/service` 入口下并由服务端兼容 OpenSumi `/service`。
 - `Dockerfile`：基于 `node:22-bookworm-slim`，内置 `opencode-ai@1.17.8`、OpenSumi 构建产物与 agent-webui server。
 - `docker/supervisord.conf`：opencode + agent-webui 双进程。
 - `docker/entrypoint.sh`：dumb-init -> supervisord。
@@ -41,7 +41,7 @@
 待接入验证：
 
 - 与 `agent-master` 联调 `/agent/*` 与 `/webui/*` 双反代。
-- `agent-master` 侧确认是否剥离 `/webui` 前缀；当前 OpenSumi WebSocket 本地默认走 `/service`。
+- 经 `agent-master` 复验 `/webui/service` WebSocket Upgrade，确认无需新增根 `/service` 反代路径。
 
 ## M2：vscode 扩展生态 + 双向 AG-UI
 

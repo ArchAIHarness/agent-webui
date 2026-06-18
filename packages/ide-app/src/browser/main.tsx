@@ -1,21 +1,60 @@
 import { Injector } from '@opensumi/di';
 import { SlotLocation } from '@opensumi/ide-core-browser';
 import { ClientApp } from '@opensumi/ide-core-browser/lib/bootstrap/app';
+import { ESupportRuntime } from '@opensumi/ide-core-browser/lib/application/runtime/constants';
 import type { IClientAppOpts } from '@opensumi/ide-core-browser';
 import '@opensumi/ide-core-browser/lib/style/index.less';
 import '@opensumi/ide-i18n';
-import { CommonBrowserModules } from '@opensumi/ide-startup/lib/browser/common-modules';
-import { createRoot } from 'react-dom/client';
-import React from 'react';
+import { ClientCommonModule } from '@opensumi/ide-core-browser';
+import { DecorationModule } from '@opensumi/ide-decoration/lib/browser';
+import { EditorModule } from '@opensumi/ide-editor/lib/browser';
+import { ExplorerModule } from '@opensumi/ide-explorer/lib/browser';
+import { FileSchemeModule } from '@opensumi/ide-file-scheme/lib/browser';
+import { FileServiceClientModule } from '@opensumi/ide-file-service/lib/browser';
+import { FileTreeNextModule } from '@opensumi/ide-file-tree-next/lib/browser';
+import { LogModule } from '@opensumi/ide-logs/lib/browser';
+import { MainLayoutModule } from '@opensumi/ide-main-layout/lib/browser';
+import { MenuBarModule } from '@opensumi/ide-menu-bar/lib/browser';
+import { MonacoModule } from '@opensumi/ide-monaco/lib/browser';
+import { OutputModule } from '@opensumi/ide-output/lib/browser';
+import { OverlayModule } from '@opensumi/ide-overlay/lib/browser';
+import { PreferencesModule } from '@opensumi/ide-preferences/lib/browser';
+import { QuickOpenModule } from '@opensumi/ide-quick-open/lib/browser';
+import { StatusBarModule } from '@opensumi/ide-status-bar/lib/browser';
+import { StorageModule } from '@opensumi/ide-storage/lib/browser';
+import { ThemeModule } from '@opensumi/ide-theme/lib/browser';
+import { WorkspaceModule } from '@opensumi/ide-workspace/lib/browser';
 import './styles.less';
 
 const basePath = (window as unknown as { AGENT_WEBUI_BASE_PATH?: string }).AGENT_WEBUI_BASE_PATH ?? '/webui';
+const normalizedBasePath = basePath === '/' ? '' : basePath.replace(/\/$/, '');
+const browserModules = [
+  MainLayoutModule,
+  OverlayModule,
+  LogModule,
+  ClientCommonModule,
+  MenuBarModule,
+  MonacoModule,
+  StatusBarModule,
+  EditorModule,
+  ExplorerModule,
+  FileTreeNextModule,
+  FileServiceClientModule,
+  FileSchemeModule,
+  OutputModule,
+  QuickOpenModule,
+  ThemeModule,
+  WorkspaceModule,
+  StorageModule,
+  PreferencesModule,
+  DecorationModule,
+];
 
 const toWsPath = (): string => {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  // OpenSumi ServerApp 默认 WS 路径是 /service。
-  // agent-master 可在 /webui/* 入口处做路径前缀剥离；本地直连走 /service。
-  return `${protocol}//${window.location.host}/service`;
+  // ClientApp 会在 wsPath 后自动拼接 /service。
+  // 子路径部署时必须连接 /webui/service，避免绕过 agent-master 的 /webui/* 反代入口。
+  return `${protocol}//${window.location.host}${normalizedBasePath}`;
 };
 
 const layoutConfig: IClientAppOpts['layoutConfig'] = {
@@ -25,7 +64,7 @@ const layoutConfig: IClientAppOpts['layoutConfig'] = {
   [SlotLocation.main]: { modules: ['@opensumi/ide-editor'] },
   [SlotLocation.right]: { modules: [] },
   [SlotLocation.statusBar]: { modules: ['@opensumi/ide-status-bar'] },
-  [SlotLocation.bottom]: { modules: ['@opensumi/ide-output', '@opensumi/ide-terminal-next'] },
+  [SlotLocation.bottom]: { modules: ['@opensumi/ide-output'] },
   [SlotLocation.extra]: { modules: [] },
 };
 
@@ -33,7 +72,7 @@ async function bootstrap(): Promise<void> {
   const injector = new Injector();
   const app = new ClientApp({
     injector,
-    modules: [...CommonBrowserModules],
+    modules: [...browserModules],
     layoutConfig,
     appName: 'agent-webui',
     appHost: 'web',
@@ -43,7 +82,7 @@ async function bootstrap(): Promise<void> {
     storageDirName: '.agent-webui',
     preferenceDirName: '.agent-webui',
     extensionStorageDirName: '.agent-webui/extensions',
-    wsPath: toWsPath,
+    wsPath: toWsPath(),
     staticServicePath: `${basePath}/assets`,
     useCdnIcon: true,
     defaultPreferences: {
@@ -62,15 +101,8 @@ async function bootstrap(): Promise<void> {
     throw new Error('missing #main element');
   }
 
-  await app.start((element) => {
-    const root = createRoot(rootEl);
-    return new Promise<void>((resolve) => {
-      root.render(
-        React.createElement('div', { id: 'agent-webui-root', className: 'agent-webui-root' }, element),
-      );
-      resolve();
-    });
-  });
+  rootEl.classList.add('agent-webui-root');
+  await app.start(rootEl, ESupportRuntime.Web);
 
   document.getElementById('loading')?.remove();
 }

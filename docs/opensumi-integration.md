@@ -5,7 +5,7 @@
 - **不 fork、不改 core 源码**。所有定制走插件机制。
 - 以 `@opensumi/ide-*` 系列包形式锁版本依赖。
 - 升级跟随官方节奏；遇阻在 issue 反馈或 patch-package 临时绕，不改源码长期分叉。
-- 学习路径：先吃透 `@opensumi/ide-startup` 启动模板和 `tools/dev-tool`，再看具体模块源码。
+- 学习路径：先吃透 OpenSumi `@opensumi/ide-*` 模块、BrowserModule/NodeModule 与 `tools/dev-tool`，再看具体模块源码。
 
 ## 2. 关键概念
 
@@ -19,60 +19,56 @@
 | LayoutConfig | 整个 IDE 的布局描述，自由组合 Slot |
 | Connection | OpenSumi 自带的 Browser ↔ Node RPC，类似 vscode 的 IPC |
 
-## 3. 启动模板派生
+## 3. 启动入口与模块白名单
 
-M1 阶段从 `@opensumi/ide-startup` 派生：
+M1 阶段不直接使用 `@opensumi/ide-startup` 的 `CommonBrowserModules` / `CommonNodeModules`，而是显式维护基础 IDE 所需的 Browser/Node 模块白名单，避免提前启用 Terminal、Search、Extension、Debug 等深功能。
 
 ```text
 packages/ide-app/
   src/
     browser/
-      app.tsx              # renderApp 入口
-      modules.ts           # BrowserModule 集合
-      layout.ts            # 自定义 LayoutConfig
+      main.tsx             # ClientApp 入口、BrowserModule 白名单、LayoutConfig
     node/
-      server.ts            # 启动 Node 服务
-      modules.ts           # NodeModule 集合
+      server.ts            # ServerApp 入口、NodeModule 白名单、静态资源与 WebSocket 兼容
+      runtime-directories.ts
     common/
-      tokens.ts            # DI Token 定义
+      tokens.ts            # DI Token 定义（后续自研 Module 使用）
 ```
 
 入口示例：
 
 ```ts
-// browser/app.tsx
-import { renderApp } from '@opensumi/ide-startup/lib/web';
-import { CommonBrowserModules } from './modules';
-import { layoutConfig } from './layout';
+// browser/main.tsx
+const browserModules = [
+  MainLayoutModule,
+  ClientCommonModule,
+  MonacoModule,
+  EditorModule,
+  ExplorerModule,
+  FileServiceClientModule,
+  OutputModule,
+  WorkspaceModule,
+];
 
-renderApp({
-  modules: CommonBrowserModules,
-  layoutConfig,
-  layoutComponent: undefined, // 用 OpenSumi 默认 Layout 渲染器，仅替换 LayoutConfig
-});
+await app.start(rootEl, ESupportRuntime.Web);
+```
+
+```ts
+// node/server.ts
+const nodeModules = [ServerCommonModule, LogServiceModule, FileServiceModule, FileSchemeNodeModule];
+await serverApp.start(server);
 ```
 
 ## 4. 直接复用的 OpenSumi 模块
 
-仅列 P0 必备：
+M1 仅启用基础 IDE 必需模块：
 
-```ts
-import { CommonBrowserModules as Builtin } from '@opensumi/ide-startup/lib/web/common-modules';
-// 等价于以下 + 一些工具模块
-//   @opensumi/ide-editor/lib/browser
-//   @opensumi/ide-terminal-next/lib/browser
-//   @opensumi/ide-explorer/lib/browser
-//   @opensumi/ide-workspace/lib/browser
-//   @opensumi/ide-search/lib/browser
-//   @opensumi/ide-scm/lib/browser
-//   @opensumi/ide-debug/lib/browser
-//   @opensumi/ide-quick-open/lib/browser
-//   @opensumi/ide-keymaps/lib/browser
-//   @opensumi/ide-theme/lib/browser
-//   @opensumi/ide-extension/lib/browser
-```
+- Browser：布局、菜单、Monaco/Editor、Explorer/FileTree、FileService、Output、QuickOpen、Theme、Workspace、Storage、Preferences、Decoration。
+- Node：ServerCommon、LogService、FileService、FileScheme。
 
-具体清单按 OpenSumi 当前发布版为准，M1 锁定后写入 `packages/ide-app/package.json`。
+M1 暂不启用：TerminalNext、Extension、OpenVSX Extension Manager、Search、Debug、Monaco Enhance。后续 M2/M3 打开对应能力时，必须同步补齐 Browser 模块、Node 模块、直接依赖、测试和验收用例。
+
+具体清单按 `packages/ide-app/src/browser/main.tsx`、`packages/ide-app/src/node/server.ts` 和 `packages/ide-app/package.json` 为准。
 
 ## 5. 自研 Module 标准结构
 
@@ -171,7 +167,7 @@ const client = useInjectable<IAGUIClientService>(AGUIClientServiceToken);
 
 ## 10. 学习参考
 
-- 启动模板：`@opensumi/ide-startup`
+- 启动参考：OpenSumi `ClientApp` / `ServerApp` 与各 `@opensumi/ide-*` 模块源码
 - Slot 体系：OpenSumi 文档 "Layout & Slot"
 - Contribution：OpenSumi 文档 "Contribution Point"
 - DI：`@opensumi/di` 仓库

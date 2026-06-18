@@ -116,7 +116,7 @@ AG-UI 是"A2UI"在跨厂商规范层的标准答案。MCP-UI 与 AG-UI 互补：
 ## 7. 技术栈
 
 - 底座：`@opensumi/ide-*` 系列模块（不 fork core）
-- 前端：基于 `@opensumi/ide-startup` 模板派生，叠加自研 Module
+- 前端：基于 `@opensumi/ide-*` 显式模块白名单启动，叠加自研 Module
 - 编辑器：Monaco（OpenSumi 内置）
 - 终端：xterm.js + pty（OpenSumi 内置）
 - 协议：`@ag-ui/client` + `@ag-ui/core`
